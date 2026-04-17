@@ -1,87 +1,78 @@
-# 🚀 Guia de Deploy no GitHub
+# 🚀 Guia de Deploy — Performance Engine
 
-## Passo a passo para publicar no GitHub
+## Variáveis de Ambiente Obrigatórias
 
-### 1. Criar repositório no GitHub
+Configure as seguintes variáveis em **todas** as plataformas de deploy:
 
-1. Acesse [github.com/new](https://github.com/new)
-2. Nome do repositório: `performance-engine`
-3. Descrição: `⚡ Organizador diário inteligente — combata a procrastinação e maximize sua performance`
-4. Marque como **Public**
-5. **NÃO** marque "Add a README" (já temos um)
-6. Clique em **Create repository**
+| Variável | Onde encontrar |
+|----------|----------------|
+| `VITE_SUPABASE_URL` | Dashboard Supabase → Project Settings → API → Project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Dashboard Supabase → Project Settings → API → anon / public key |
 
-### 2. Subir os arquivos
-
-Após criar o repositório, abra o terminal e execute:
-
-```bash
-# Navegue até a pasta do projeto (onde está este arquivo)
-cd performance-engine
-
-# Inicialize o git
-git init
-
-# Adicione todos os arquivos
-git add .
-
-# Faça o primeiro commit
-git commit -m "🚀 Versão inicial do Performance Engine"
-
-# Conecte ao repositório remoto (substitua SEU-USUARIO)
-git remote add origin https://github.com/SEU-USUARIO/performance-engine.git
-
-# Renomeie a branch principal para main
-git branch -M main
-
-# Envie para o GitHub
-git push -u origin main
-```
-
-### 3. Ativar GitHub Pages (site online grátis)
-
-1. No repositório, vá em **Settings** (ícone de engrenagem)
-2. No menu lateral, clique em **Pages**
-3. Em **Source**, selecione:
-   - Branch: `main`
-   - Folder: `/public`
-4. Clique em **Save**
-5. Aguarde 1-2 minutos
-6. Seu app estará live em: `https://SEU-USUARIO.github.io/performance-engine/`
-
-### 4. Personalizar
-
-Após o deploy, lembre-se de:
-
-- [ ] Substituir `SEU-USUARIO` no README.md pelo seu username do GitHub
-- [ ] Adicionar a URL do GitHub Pages no campo "Website" do repositório
-- [ ] Adicionar topics: `productivity`, `task-manager`, `javascript`, `web-app`, `timer`
+> **Nunca** exponha `SUPABASE_SERVICE_ROLE_KEY` em variáveis do cliente.
 
 ---
 
-## 📁 Estrutura dos arquivos
+## Deploy na Vercel (recomendado)
 
+### Via interface web
+
+1. Acesse [vercel.com/new](https://vercel.com/new)
+2. Conecte seu repositório GitHub
+3. Em **Environment Variables**, adicione:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+4. Clique em **Deploy**
+
+A Vercel detecta automaticamente que é um projeto Vite.
+
+### Via CLI
+
+```bash
+npm install -g vercel
+vercel --prod
 ```
-performance-engine/
-├── public/
-│   └── index.html     ← Este é o arquivo que o GitHub Pages vai servir
-├── src/
-│   └── App.jsx        ← Componente React (para uso em projetos React)
-├── docs/
-│   └── DEPLOY.md      ← Este arquivo
-├── .gitignore
-├── LICENSE
-└── README.md
+
+---
+
+## Deploy no Netlify
+
+### Via interface web
+
+1. Acesse [app.netlify.com/start](https://app.netlify.com/start)
+2. Conecte seu repositório GitHub
+3. Configure:
+   - **Build command:** `npm run build`
+   - **Publish directory:** `dist`
+4. Em **Site settings → Environment variables**, adicione:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+5. Faça um redeploy para aplicar as variáveis
+
+### Via CLI
+
+```bash
+npm install -g netlify-cli
+netlify deploy --prod --dir=dist
 ```
 
-## 🔄 Atualizações futuras
+---
 
-Para enviar novas mudanças:
+## Build local
+
+```bash
+npm run build
+# bundle gerado em dist/
+```
+
+---
+
+## Atualizações
+
+Qualquer push para `main` dispara um deploy automático na Vercel/Netlify.
 
 ```bash
 git add .
 git commit -m "Descrição da mudança"
 git push
 ```
-
-O GitHub Pages atualiza automaticamente em ~1 minuto.
