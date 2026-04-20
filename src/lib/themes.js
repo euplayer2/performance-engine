@@ -8,6 +8,7 @@ export const THEMES = {
     border: 'rgba(255,255,255,0.06)',
     accent: '#E85D3A', green: '#2EBD6B',
     yellow: '#E8A93A', blue: '#3A8FE8', purple: '#B45CE8',
+    btnText: '#FFFFFF',
   },
   midnight: {
     label: 'Azul Meia-noite',
@@ -18,16 +19,17 @@ export const THEMES = {
     border: 'rgba(59,130,246,0.15)',
     accent: '#3B82F6', green: '#10B981',
     yellow: '#F59E0B', blue: '#60A5FA', purple: '#8B5CF6',
+    btnText: '#FFFFFF',
   },
   monochrome: {
     label: 'Preto & Branco',
-    bg1: '#000000', bg2: '#0A0A0A', bg3: '#141414',
-    text: '#FFFFFF', textDim: 'rgba(255,255,255,0.55)',
+    text: '#FFFFFF', textDim: 'rgba(255,255,255,0.6)',
     textFaint: 'rgba(255,255,255,0.3)',
-    card: 'rgba(255,255,255,0.04)',
-    border: 'rgba(255,255,255,0.1)',
+    card: 'rgba(255,255,255,0.08)',
+    border: 'rgba(255,255,255,0.25)',
     accent: '#FFFFFF', green: '#FFFFFF',
     yellow: '#CCCCCC', blue: '#CCCCCC', purple: '#AAAAAA',
+    btnText: '#000000',
   },
   forest: {
     label: 'Floresta',
@@ -38,5 +40,6 @@ export const THEMES = {
     border: 'rgba(46,189,107,0.12)',
     accent: '#2EBD6B', green: '#4ADE80',
     yellow: '#FACC15', blue: '#38BDF8', purple: '#A78BFA',
+    btnText: '#FFFFFF',
   },
 };

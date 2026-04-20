@@ -66,9 +66,10 @@ export default function App({ user, onSignOut }) {
   const timerRef    = useRef(null);
   const inputRef    = useRef(null);
   const debounceRef = useRef(null);
-  const pipWindowRef = useRef(null);
+  const pipWindowRef  = useRef(null);
   const activeTimerRef = useRef(null);
   const pipActiveRef   = useRef(false);
+  const openPipRef     = useRef(null); // sempre aponta para a versão mais recente de openPip
 
   const sidebarOpen = sidebarPinned || sidebarHover;
   const sidebarW    = sidebarOpen ? SIDEBAR_W : SIDEBAR_COLLAPSED_W;
@@ -297,7 +298,7 @@ export default function App({ user, onSignOut }) {
           }
           .pip-btn:hover { opacity: 0.85; }
           .pip-btn-pause { background: rgba(255,255,255,0.08); color: #E8E8ED; border: 1px solid rgba(255,255,255,0.1); }
-          .pip-btn-done  { background: #2EBD6B; color: #fff; }
+          .pip-btn-done  { background: #2EBD6B; color: var(--btnText); }
         </style>`;
 
         pip.document.body.innerHTML = `
@@ -382,7 +383,7 @@ export default function App({ user, onSignOut }) {
       }
       .pip-btn:hover { opacity: 0.85; }
       .pip-btn-pause { background: rgba(255,255,255,0.08); color: #E8E8ED; border: 1px solid rgba(255,255,255,0.1); }
-      .pip-btn-done  { background: #2EBD6B; color: #fff; }
+      .pip-btn-done  { background: #2EBD6B; color: var(--btnText); }
     </style></head><body>
       <div id="pip-status">Focando</div>
       <div id="pip-title">${tName}</div>
@@ -412,6 +413,9 @@ export default function App({ user, onSignOut }) {
     setPipActive(true);
   };
 
+  // Mantém ref sempre atualizada com a última versão de openPip (evita stale closure)
+  openPipRef.current = openPip;
+
   const closePip = () => {
     try { pipWindowRef.current?.close(); } catch {}
     pipWindowRef.current = null;
@@ -431,8 +435,8 @@ export default function App({ user, onSignOut }) {
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden && activeTimerRef.current && !pipActiveRef.current) {
-        // Pequeno delay para garantir que o evento está completo
-        setTimeout(() => openPip(), 100);
+        // Usa a ref para garantir que sempre chamamos a versão mais atual de openPip
+        setTimeout(() => openPipRef.current?.(), 100);
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
@@ -733,7 +737,7 @@ export default function App({ user, onSignOut }) {
               </div>
               <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                 <button onClick={() => toggle(activeTimer)} style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--card)", color: "var(--text)", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Pausar</button>
-                <button onClick={() => complete(activeTimer)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "var(--green)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Concluir</button>
+                <button onClick={() => complete(activeTimer)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "var(--green)", color: "var(--btnText)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Concluir</button>
                 <button onClick={pipActive ? closePip : openPip} title={pipActive ? "Fechar pop-out" : "Timer pop-out (PiP)"} style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid var(--border)", background: pipActive ? a("var(--accent)", 15) : "var(--card)", color: pipActive ? "var(--accent)" : "var(--textFaint)", fontSize: 14, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {/* PiP icon: small square overlapping big square */}
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -872,7 +876,7 @@ export default function App({ user, onSignOut }) {
                               ))}
                             </div>
                             <div style={{ display: "flex", gap: 8 }}>
-                              <button onClick={saveEdit} style={{ flex: 1, padding: 8, borderRadius: 8, border: "none", background: "var(--blue)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Salvar</button>
+                              <button onClick={saveEdit} style={{ flex: 1, padding: 8, borderRadius: 8, border: "none", background: "var(--blue)", color: "var(--btnText)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Salvar</button>
                               <button onClick={cancelEdit} style={{ flex: 1, padding: 8, borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--textDim)", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
                             </div>
                           </div>
@@ -891,7 +895,7 @@ export default function App({ user, onSignOut }) {
                         return (
                           <div key={t.id} style={{ ...card({ marginTop: 6, padding: "10px 16px" }), background: a("var(--green)", 3), borderColor: a("var(--green)", 8) }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                              <button onClick={() => uncomplete(t.id)} style={{ width: 24, height: 24, borderRadius: 6, border: "none", background: "var(--green)", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✓</button>
+                              <button onClick={() => uncomplete(t.id)} style={{ width: 24, height: 24, borderRadius: 6, border: "none", background: "var(--green)", color: "var(--btnText)", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✓</button>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: 13, textDecoration: "line-through", color: a("var(--text)", 40) }}>{t.title}</div>
                                 <div style={{ fontSize: 10, color: "var(--textFaint)", display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -958,7 +962,7 @@ export default function App({ user, onSignOut }) {
                   Tarefa recorrente (repete todo dia)
                 </label>
 
-                <button onClick={addTaskFn} style={{ width: "100%", padding: 14, borderRadius: 12, border: "none", fontSize: 15, fontWeight: 700, cursor: newTask.title.trim() ? "pointer" : "default", fontFamily: "inherit", transition: "all 0.3s", background: newTask.title.trim() ? `linear-gradient(135deg, var(--accent), var(--yellow))` : "var(--card)", color: newTask.title.trim() ? "#fff" : a("var(--text)", 20), boxShadow: newTask.title.trim() ? `0 4px 20px ${a("var(--accent)", 30)}` : "none" }}>
+                <button onClick={addTaskFn} style={{ width: "100%", padding: 14, borderRadius: 12, border: "none", fontSize: 15, fontWeight: 700, cursor: newTask.title.trim() ? "pointer" : "default", fontFamily: "inherit", transition: "all 0.3s", background: newTask.title.trim() ? `linear-gradient(135deg, var(--accent), var(--yellow))` : "var(--card)", color: newTask.title.trim() ? "var(--btnText)" : a("var(--text)", 20), boxShadow: newTask.title.trim() ? `0 4px 20px ${a("var(--accent)", 30)}` : "none" }}>
                   Adicionar Tarefa
                 </button>
               </div>
