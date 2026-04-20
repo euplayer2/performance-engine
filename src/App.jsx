@@ -218,20 +218,16 @@ export default function App({ user, onSignOut }) {
     const rem = Math.max(est - acc, 0);
     const over = acc > est;
     const overS = acc - est;
-    const pct = Math.min((acc / est) * 100, 100);
 
     const doc = pipWindowRef.current.document;
     const timeEl = doc.getElementById("pip-time");
     const titleEl = doc.getElementById("pip-title");
-    const barEl = doc.getElementById("pip-bar");
     const statusEl = doc.getElementById("pip-status");
     const metaEl = doc.getElementById("pip-meta");
 
     if (timeEl) timeEl.textContent = over ? `+${fmtSec(overS)}` : fmtSec(rem);
     if (timeEl) timeEl.style.color = over ? "#E8A93A" : "#E85D3A";
     if (titleEl) titleEl.textContent = t.title;
-    if (barEl) barEl.style.width = `${pct}%`;
-    if (barEl) barEl.style.background = over ? "#2EBD6B" : "#E85D3A";
     if (statusEl) statusEl.textContent = over ? "Prazo atingido" : "Focando";
     if (statusEl) statusEl.style.color = over ? "#2EBD6B" : "#E85D3A";
     if (metaEl) metaEl.textContent = `Real: ${fmtSec(acc)} / Est: ${fmt(t.duration)}`;
@@ -279,12 +275,6 @@ export default function App({ user, onSignOut }) {
             font-family: 'Courier New', monospace; color: #E85D3A;
             line-height: 1; margin-bottom: 0.8vh;
           }
-          #pip-bar-bg {
-            width: 85vw; height: clamp(3px, 0.8vh, 5px);
-            background: rgba(255,255,255,0.08); border-radius: 2px;
-            margin-bottom: 0.6vh;
-          }
-          #pip-bar { height: 100%; border-radius: 2px; background: #E85D3A; transition: width 1s linear; }
           #pip-meta {
             font-size: clamp(8px, 1.6vh, 10px);
             color: rgba(232,232,237,0.4); margin-bottom: 1.2vh;
@@ -305,7 +295,6 @@ export default function App({ user, onSignOut }) {
           <div id="pip-status">Focando</div>
           <div id="pip-title">${tName}</div>
           <div id="pip-time">00:00</div>
-          <div id="pip-bar-bg"><div id="pip-bar" style="width:0%"></div></div>
           <div id="pip-meta">Real: 00:00 / Est: 0min</div>
           <div class="pip-btns">
             <button class="pip-btn pip-btn-pause" id="pip-pause">Pausar</button>
@@ -364,12 +353,6 @@ export default function App({ user, onSignOut }) {
         font-family: 'Courier New', monospace; color: #E85D3A;
         line-height: 1; margin-bottom: 0.8vh;
       }
-      #pip-bar-bg {
-        width: 85vw; height: clamp(3px, 0.8vh, 5px);
-        background: rgba(255,255,255,0.08); border-radius: 2px;
-        margin-bottom: 0.6vh;
-      }
-      #pip-bar { height: 100%; border-radius: 2px; background: #E85D3A; transition: width 1s linear; }
       #pip-meta {
         font-size: clamp(8px, 1.6vh, 10px);
         color: rgba(232,232,237,0.4); margin-bottom: 1.2vh;
@@ -388,7 +371,6 @@ export default function App({ user, onSignOut }) {
       <div id="pip-status">Focando</div>
       <div id="pip-title">${tName}</div>
       <div id="pip-time">00:00</div>
-      <div id="pip-bar-bg"><div id="pip-bar" style="width:0%"></div></div>
       <div id="pip-meta">Real: 00:00 / Est: 0min</div>
       <div class="pip-btns">
         <button class="pip-btn pip-btn-pause" id="pip-pause">Pausar</button>
