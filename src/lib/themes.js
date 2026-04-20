@@ -1,7 +1,7 @@
 export const THEMES = {
   default: {
     label: 'Original',
-    bg1: '#0D0D0F', bg2: '#1A1A2E', bg3: '#16213E',
+    bg1: '#0D0D0F', bg2: '#111113', bg3: '#141416',
     text: '#E8E8ED', textDim: 'rgba(232,232,237,0.45)',
     textFaint: 'rgba(232,232,237,0.25)',
     card: 'rgba(255,255,255,0.035)',
@@ -38,15 +38,5 @@ export const THEMES = {
     border: 'rgba(46,189,107,0.12)',
     accent: '#2EBD6B', green: '#4ADE80',
     yellow: '#FACC15', blue: '#38BDF8', purple: '#A78BFA',
-  },
-  sunset: {
-    label: 'Pôr do Sol',
-    bg1: '#1A0F0A', bg2: '#2E1A0F', bg3: '#3E2416',
-    text: '#FFF5E8', textDim: 'rgba(255,245,232,0.45)',
-    textFaint: 'rgba(255,245,232,0.25)',
-    card: 'rgba(232,169,58,0.05)',
-    border: 'rgba(232,169,58,0.15)',
-    accent: '#F97316', green: '#84CC16',
-    yellow: '#EAB308', blue: '#06B6D4', purple: '#EC4899',
   },
 };

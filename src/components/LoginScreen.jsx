@@ -37,7 +37,7 @@ export default function LoginScreen() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(165deg, #0D0D0F 0%, #1A1A2E 40%, #16213E 100%)',
+      background: '#0D0D0F',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

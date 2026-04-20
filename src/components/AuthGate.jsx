@@ -28,7 +28,7 @@ export default function AuthGate() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(165deg, #0D0D0F 0%, #1A1A2E 40%, #16213E 100%)',
+        background: '#0D0D0F',
       }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>⚡</div>
