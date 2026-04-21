@@ -70,6 +70,8 @@ export default function App({ user, onSignOut }) {
   const activeTimerRef = useRef(null);
   const pipActiveRef   = useRef(false);
   const openPipRef     = useRef(null); // sempre aponta para a versão mais recente de openPip
+  const workerRef      = useRef(null);
+  const startTimeRef   = useRef(null);
 
   const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
   const isMobile = windowWidth < 768;
@@ -145,7 +147,6 @@ export default function App({ user, onSignOut }) {
     }
   }, [reloadTasks]);
 
-  // ─── Carga inicial ───
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -166,6 +167,30 @@ export default function App({ user, onSignOut }) {
     })();
     return () => { cancelled = true; };
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Inicializa Web Worker ───
+  useEffect(() => {
+    const workerCode = `
+      let timer = null;
+      self.onmessage = (e) => {
+        if (e.data === 'start') {
+          if (timer) clearInterval(timer);
+          timer = setInterval(() => self.postMessage('tick'), 1000);
+        } else if (e.data === 'stop') {
+          clearInterval(timer);
+          timer = null;
+        }
+      };
+    `;
+    const blob = new Blob([workerCode], { type: "application/javascript" });
+    const worker = new Worker(URL.createObjectURL(blob));
+    workerRef.current = worker;
+
+    return () => {
+      worker.terminate();
+      URL.revokeObjectURL(blob);
+    };
+  }, []);
 
   // ─── Virada de meia-noite ───
   useEffect(() => {
@@ -207,11 +232,23 @@ export default function App({ user, onSignOut }) {
     try { await savePrefs({ sidebarPinned: next }); } catch {}
   };
 
-  // ─── Timer tick ───
+  // ─── Timer tick (Web Worker + Timestamp Sync) ───
   useEffect(() => {
-    if (activeTimer) timerRef.current = setInterval(() => setTimerSec(s => s + 1), 1000);
-    else clearInterval(timerRef.current);
-    return () => clearInterval(timerRef.current);
+    if (!workerRef.current) return;
+
+    const handleMessage = () => {
+      if (startTimeRef.current) {
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        setTimerSec(elapsed);
+      }
+    };
+
+    if (activeTimer) {
+      workerRef.current.onmessage = handleMessage;
+      workerRef.current.postMessage("start");
+    } else {
+      workerRef.current.postMessage("stop");
+    }
   }, [activeTimer]);
 
   // ─── PiP: atualiza conteúdo ───
@@ -544,6 +581,7 @@ export default function App({ user, onSignOut }) {
       }
       setTasks(p => p.map(t => t.id === id ? { ...t, timerStarted: true } : t));
       updateTask(id, { timerStarted: true }).catch(() => {});
+      startTimeRef.current = Date.now();
       setActiveTimer(id); setTimerSec(0);
     }
   };
