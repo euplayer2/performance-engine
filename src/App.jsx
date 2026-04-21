@@ -71,8 +71,17 @@ export default function App({ user, onSignOut }) {
   const pipActiveRef   = useRef(false);
   const openPipRef     = useRef(null); // sempre aponta para a versão mais recente de openPip
 
+  const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
+  const isMobile = windowWidth < 768;
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const sidebarOpen = sidebarPinned || sidebarHover;
-  const sidebarW    = sidebarOpen ? SIDEBAR_W : SIDEBAR_COLLAPSED_W;
+  const sidebarW    = isMobile ? 0 : (sidebarOpen ? SIDEBAR_W : SIDEBAR_COLLAPSED_W);
 
   const flash = (m) => { setToast(m); setTimeout(() => setToast(null), 2500); };
 
@@ -576,7 +585,10 @@ export default function App({ user, onSignOut }) {
           <div style={{ width: 32, height: 32, border: "3px solid rgba(232,93,58,0.2)", borderTopColor: "#E85D3A", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto" }} />
           <div style={{ fontSize: 11, color: "rgba(232,232,237,0.3)", marginTop: 14, letterSpacing: 2, textTransform: "uppercase" }}>Carregando...</div>
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <style>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          body { overflow-x: hidden; }
+        `}</style>
       </div>
     );
   }
@@ -602,94 +614,111 @@ export default function App({ user, onSignOut }) {
       )}
 
       {/* ═══════════════════ SIDEBAR ═══════════════════ */}
-      <aside
-        onMouseEnter={() => !sidebarPinned && setSidebarHover(true)}
-        onMouseLeave={() => !sidebarPinned && setSidebarHover(false)}
-        style={{
-          width: sidebarW, flexShrink: 0,
-          background: `color-mix(in srgb, var(--bg1) 94%, black)`,
-          borderRight: "1px solid var(--border)",
-          display: "flex", flexDirection: "column",
-          position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 50,
-          transition: "width 0.25s ease",
-          overflow: "hidden",
-        }}>
-        {/* Logo */}
-        <div style={{ padding: sidebarOpen ? "20px 16px 16px" : "20px 10px 16px", borderBottom: "1px solid var(--border)", minHeight: 80, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          {sidebarOpen ? (
-            <>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                <span style={{ color: "var(--accent)", fontSize: 14 }}>●</span>
-                <div style={{ fontSize: 8, fontFamily: "'Space Mono', monospace", color: "var(--accent)", letterSpacing: 2, textTransform: "uppercase", lineHeight: 1.5 }}>
-                  PERFORMANCE<br />ENGINE
-                </div>
-              </div>
-              <div style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.2, color: "var(--text)" }}>
-                Seu Dia, <span style={{ color: "var(--accent)" }}>Otimizado</span>
-              </div>
-            </>
-          ) : (
-            <div style={{ textAlign: "center" }}>
-              <span style={{ color: "var(--accent)", fontSize: 14, fontWeight: 700 }}>PE</span>
-            </div>
-          )}
-        </div>
-
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: sidebarOpen ? "12px 8px" : "12px 6px", overflowY: "auto" }}>
-          {navItem("tasks",     "Tarefas")}
-          {navItem("add",       "Adicionar")}
-          {navItem("stats",     "Estatísticas")}
-          {navItem("customize", "Personalizar")}
-        </nav>
-
-        {/* Bottom: quote + pin + sair */}
-        <div style={{ padding: sidebarOpen ? "12px 12px 16px" : "12px 6px 16px", borderTop: "1px solid var(--border)" }}>
-          {sidebarOpen && (
-            <div style={{ ...card({ padding: "12px 14px", marginBottom: 8 }), fontSize: 11, fontStyle: "italic", color: "var(--textFaint)", lineHeight: 1.6 }}>
-              "{motivation}"
-            </div>
-          )}
-
-          {/* Pin toggle */}
-          <button onClick={toggleSidebarPin} title={sidebarPinned ? "Retrair barra lateral" : "Fixar barra lateral"} style={{
-            width: "100%", padding: sidebarOpen ? "7px 12px" : "7px", borderRadius: 8,
-            border: "1px solid var(--border)", background: sidebarPinned ? a("var(--accent)", 8) : "transparent",
-            color: sidebarPinned ? "var(--accent)" : "var(--textFaint)", fontSize: 12, cursor: "pointer",
-            fontFamily: "inherit", transition: "all 0.2s", textAlign: "center", marginBottom: 6,
-            display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "flex-start" : "center", gap: 8,
+      {!isMobile && (
+        <aside
+          onMouseEnter={() => !sidebarPinned && setSidebarHover(true)}
+          onMouseLeave={() => !sidebarPinned && setSidebarHover(false)}
+          style={{
+            width: sidebarW, flexShrink: 0,
+            background: `color-mix(in srgb, var(--bg1) 94%, black)`,
+            borderRight: "1px solid var(--border)",
+            display: "flex", flexDirection: "column",
+            position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 50,
+            transition: "width 0.25s ease",
+            overflow: "hidden",
           }}>
-            <span style={{ fontSize: 14, flexShrink: 0 }}>{sidebarPinned ? "◀" : "▶"}</span>
-            {sidebarOpen && <span>{sidebarPinned ? "Retrair" : "Fixar"}</span>}
-          </button>
+          {/* Logo */}
+          <div style={{ padding: sidebarOpen ? "20px 16px 16px" : "20px 10px 16px", borderBottom: "1px solid var(--border)", minHeight: 80, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            {sidebarOpen ? (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <span style={{ color: "var(--accent)", fontSize: 14 }}>●</span>
+                  <div style={{ fontSize: 8, fontFamily: "'Space Mono', monospace", color: "var(--accent)", letterSpacing: 2, textTransform: "uppercase", lineHeight: 1.5 }}>
+                    PERFORMANCE<br />ENGINE
+                  </div>
+                </div>
+                <div style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.2, color: "var(--text)" }}>
+                  Seu Dia, <span style={{ color: "var(--accent)" }}>Otimizado</span>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: "center" }}>
+                <span style={{ color: "var(--accent)", fontSize: 14, fontWeight: 700 }}>PE</span>
+              </div>
+            )}
+          </div>
 
-          {sidebarOpen && (
-            <button onClick={onSignOut} style={{
-              width: "100%", padding: "8px 12px", borderRadius: 8,
-              border: "1px solid var(--border)", background: "transparent",
-              color: "var(--textFaint)", fontSize: 12, cursor: "pointer",
-              fontFamily: "inherit", transition: "all 0.2s", textAlign: "left",
+          {/* Nav */}
+          <nav style={{ flex: 1, padding: sidebarOpen ? "12px 8px" : "12px 6px", overflowY: "auto" }}>
+            {navItem("tasks",     "Tarefas")}
+            {navItem("add",       "Adicionar")}
+            {navItem("stats",     "Estatísticas")}
+            {navItem("customize", "Personalizar")}
+          </nav>
+
+          {/* Bottom: quote + pin + sair */}
+          <div style={{ padding: sidebarOpen ? "12px 12px 16px" : "12px 6px 16px", borderTop: "1px solid var(--border)" }}>
+            {sidebarOpen && (
+              <div style={{ ...card({ padding: "12px 14px", marginBottom: 8 }), fontSize: 11, fontStyle: "italic", color: "var(--textFaint)", lineHeight: 1.6 }}>
+                "{motivation}"
+              </div>
+            )}
+
+            {/* Pin toggle */}
+            <button onClick={toggleSidebarPin} title={sidebarPinned ? "Retrair barra lateral" : "Fixar barra lateral"} style={{
+              width: "100%", padding: sidebarOpen ? "7px 12px" : "7px", borderRadius: 8,
+              border: "1px solid var(--border)", background: sidebarPinned ? a("var(--accent)", 8) : "transparent",
+              color: sidebarPinned ? "var(--accent)" : "var(--textFaint)", fontSize: 12, cursor: "pointer",
+              fontFamily: "inherit", transition: "all 0.2s", textAlign: "center", marginBottom: 6,
+              display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "flex-start" : "center", gap: 8,
             }}>
-              Sair
+              <span style={{ fontSize: 14, flexShrink: 0 }}>{sidebarPinned ? "◀" : "▶"}</span>
+              {sidebarOpen && <span>{sidebarPinned ? "Retrair" : "Fixar"}</span>}
             </button>
-          )}
-        </div>
-      </aside>
+
+            {sidebarOpen && (
+              <button onClick={onSignOut} style={{
+                width: "100%", padding: "8px 12px", borderRadius: 8,
+                border: "1px solid var(--border)", background: "transparent",
+                color: "var(--textFaint)", fontSize: 12, cursor: "pointer",
+                fontFamily: "inherit", transition: "all 0.2s", textAlign: "left",
+              }}>
+                Sair
+              </button>
+            )}
+          </div>
+        </aside>
+      )}
 
       {/* ═══════════════════ MAIN CONTENT ═══════════════════ */}
       <main style={{ marginLeft: sidebarW, flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh", transition: "margin-left 0.25s ease" }}>
 
         {/* Top header */}
         <div style={{
-          padding: "22px 32px 18px",
+          padding: isMobile ? "16px 20px" : "22px 32px 18px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
           borderBottom: "1px solid var(--border)",
           background: a("var(--bg1)", 40),
           backdropFilter: "blur(8px)",
           position: "sticky", top: 0, zIndex: 10,
         }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, margin: 0, color: "var(--text)" }}>{PAGE_TITLES[tab]}</h1>
-          <div style={{ fontSize: 12, color: "var(--textFaint)", textTransform: "capitalize" }}>{fmtDate()}</div>
+          <div>
+            <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, letterSpacing: -0.5, margin: 0, color: "var(--text)" }}>{PAGE_TITLES[tab]}</h1>
+            <div style={{ fontSize: 10, color: "var(--textFaint)", textTransform: "capitalize", marginTop: 2 }}>{fmtDate()}</div>
+          </div>
+
+          {isMobile && (
+            <button onClick={onSignOut} title="Sair" style={{
+              background: "transparent", border: "none", color: "var(--textFaint)",
+              cursor: "pointer", padding: 8, display: "flex", alignItems: "center", justifyContent: "center"
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          )}
         </div>
 
         {/* ─── ACTIVE TIMER ─── */}
@@ -699,12 +728,20 @@ export default function App({ user, onSignOut }) {
           const rem = Math.max(est - acc, 0), over = acc > est, overS = acc - est;
           const p = Math.min((acc / est) * 100, 100);
           return (
-            <div style={{ margin: "16px 32px 0", ...card({ padding: "14px 20px" }), borderColor: over ? a("var(--green)", 25) : a("var(--accent)", 25), background: over ? a("var(--green)", 5) : a("var(--accent)", 5), display: "flex", alignItems: "center", gap: 20 }}>
+            <div style={{
+              margin: isMobile ? "12px 20px 0" : "16px 32px 0",
+              ...card({ padding: isMobile ? "12px 16px" : "14px 20px" }),
+              borderColor: over ? a("var(--green)", 25) : a("var(--accent)", 25),
+              background: over ? a("var(--green)", 5) : a("var(--accent)", 5),
+              display: "flex", flexDirection: isMobile ? "column" : "row",
+              alignItems: isMobile ? "stretch" : "center",
+              gap: isMobile ? 12 : 20
+            }}>
               <div style={{ flexShrink: 0 }}>
                 <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: over ? "var(--green)" : "var(--accent)", marginBottom: 3 }}>
                   {over ? "Prazo atingido" : "Focando"}
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{t.title}</div>
+                <div style={{ fontSize: isMobile ? 16 : 14, fontWeight: 700, color: "var(--text)" }}>{t.title}</div>
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ height: 4, background: "var(--border)", borderRadius: 2, overflow: "hidden", marginBottom: 4 }}>
@@ -714,32 +751,38 @@ export default function App({ user, onSignOut }) {
                   <span>Real: {fmtSec(acc)}</span><span>Est: {fmt(t.duration)}</span>
                 </div>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, fontFamily: "'Space Mono', monospace", color: over ? "var(--yellow)" : "var(--accent)", flexShrink: 0 }}>
-                {over ? `+${fmtSec(overS)}` : fmtSec(rem)}
-              </div>
-              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                <button onClick={() => toggle(activeTimer)} style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--card)", color: "var(--text)", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Pausar</button>
-                <button onClick={() => complete(activeTimer)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "var(--green)", color: "var(--btnText)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Concluir</button>
-                <button onClick={pipActive ? closePip : openPip} title={pipActive ? "Fechar pop-out" : "Timer pop-out (PiP)"} style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid var(--border)", background: pipActive ? a("var(--accent)", 15) : "var(--card)", color: pipActive ? "var(--accent)" : "var(--textFaint)", fontSize: 14, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {/* PiP icon: small square overlapping big square */}
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="1" y="2" width="14" height="11" rx="1.5" />
-                    <rect x="8" y="7" width="6" height="5" rx="1" fill="currentColor" opacity="0.3" />
-                  </svg>
-                </button>
+              <div style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                gap: 12
+              }}>
+                <div style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, fontFamily: "'Space Mono', monospace", color: over ? "var(--yellow)" : "var(--accent)", flexShrink: 0 }}>
+                  {over ? `+${fmtSec(overS)}` : fmtSec(rem)}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                  <button onClick={() => toggle(activeTimer)} style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--card)", color: "var(--text)", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Pausar</button>
+                  <button onClick={() => complete(activeTimer)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "var(--green)", color: "var(--btnText)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Concluir</button>
+                  {!isMobile && (
+                    <button onClick={pipActive ? closePip : openPip} title={pipActive ? "Fechar pop-out" : "Timer pop-out (PiP)"} style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid var(--border)", background: pipActive ? a("var(--accent)", 15) : "var(--card)", color: pipActive ? "var(--accent)" : "var(--textFaint)", fontSize: 14, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="1" y="2" width="14" height="11" rx="1.5" />
+                        <rect x="8" y="7" width="6" height="5" rx="1" fill="currentColor" opacity="0.3" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );
         })()}
 
         {/* ─── CONTENT AREA ─── */}
-        <div style={{ padding: "24px 32px", flex: 1 }}>
+        <div style={{ padding: isMobile ? "16px 20px 100px" : "24px 32px", flex: 1 }}>
 
           {/* ══════════ TAB: TAREFAS ══════════ */}
           {tab === "tasks" && (
             <div>
               {/* Top row: Time slider + Progress */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 20 }}>
 
                 {/* Tempo hoje */}
                 <div style={card()}>
@@ -819,15 +862,30 @@ export default function App({ user, onSignOut }) {
                                   <span style={{ color: a("var(--text)", 20) }}>·</span>
                                   <span style={{ color: acc > t.duration * 60 ? "var(--yellow)" : "var(--green)", fontFamily: "'Space Mono', monospace", fontWeight: 600 }}>{fmtSec(acc)}</span>
                                 </>}
+                                {isMobile && (
+                                  <div style={{ width: "100%", display: "flex", gap: 12, marginTop: 10 }}>
+                                    <button onClick={() => toggle(t.id)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "1px solid var(--border)", background: active ? a("var(--accent)", 15) : "var(--card)", color: active ? "var(--accent)" : "var(--textFaint)", cursor: "pointer", fontSize: 12, fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                                      {active ? "Pausar" : "Iniciar"} {active ? "||" : "▶"}
+                                    </button>
+                                    <button onClick={() => startEdit(t.id)} style={{ width: 36, height: 36, borderRadius: 8, border: "none", background: "var(--card)", color: "var(--textFaint)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z"/></svg>
+                                    </button>
+                                    <button onClick={() => del(t.id)} style={{ width: 36, height: 36, borderRadius: 8, border: "none", background: "transparent", color: a("var(--text)", 20), cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                            <button onClick={() => toggle(t.id)} style={{ padding: "5px 12px", borderRadius: 7, border: "1px solid var(--border)", background: active ? a("var(--accent)", 15) : "var(--card)", color: active ? "var(--accent)" : "var(--textFaint)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>
-                              {active ? "||" : "▶"}
-                            </button>
-                            <button onClick={() => startEdit(t.id)} style={{ width: 30, height: 30, borderRadius: 7, border: "none", background: "var(--card)", color: "var(--textFaint)", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit" }}>
-                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z"/></svg>
-                            </button>
-                            <button onClick={() => del(t.id)} style={{ width: 30, height: 30, borderRadius: 7, border: "none", background: "transparent", color: a("var(--text)", 20), cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                            {!isMobile && (
+                              <>
+                                <button onClick={() => toggle(t.id)} style={{ padding: "5px 12px", borderRadius: 7, border: "1px solid var(--border)", background: active ? a("var(--accent)", 15) : "var(--card)", color: active ? "var(--accent)" : "var(--textFaint)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>
+                                  {active ? "||" : "▶"}
+                                </button>
+                                <button onClick={() => startEdit(t.id)} style={{ width: 30, height: 30, borderRadius: 7, border: "none", background: "var(--card)", color: "var(--textFaint)", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit" }}>
+                                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z"/></svg>
+                                </button>
+                                <button onClick={() => del(t.id)} style={{ width: 30, height: 30, borderRadius: 7, border: "none", background: "transparent", color: a("var(--text)", 20), cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                              </>
+                            )}
                           </div>
                         ) : (
                           <div>
@@ -955,7 +1013,7 @@ export default function App({ user, onSignOut }) {
           {tab === "stats" && (
             <div>
               {/* 4-column stats */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
                 {[
                   { l: "Tarefas",    v: todayT.length,       sub: null },
                   { l: "Concluídas", v: done.length,          sub: null },
@@ -1020,14 +1078,14 @@ export default function App({ user, onSignOut }) {
               </div>
 
               {/* Bottom row: Streak + Gerenciar */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div style={{ ...card({ textAlign: "center" }), background: a("var(--accent)", 6), borderColor: a("var(--accent)", 10) }}>
-                  <div style={{ fontSize: 32, fontWeight: 800, fontFamily: "'Space Mono', monospace", color: "var(--accent)", marginBottom: 4 }}>{streak}</div>
-                  <div style={{ fontSize: 12, color: "var(--textFaint)" }}>dias consecutivos</div>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+                <div style={{ ...card({ textAlign: "center", padding: "12px" }), background: a("var(--accent)", 6), borderColor: a("var(--accent)", 10) }}>
+                  <div style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800, fontFamily: "'Space Mono', monospace", color: "var(--accent)", marginBottom: 4 }}>{streak}</div>
+                  <div style={{ fontSize: 11, color: "var(--textFaint)" }}>dias consecutivos</div>
                 </div>
-                <div style={card()}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--textFaint)", marginBottom: 14 }}>Gerenciar dados</div>
-                  <button onClick={resetAll} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--textFaint)", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
+                <div style={card({ padding: "12px" })}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--textFaint)", marginBottom: 14 }}>Gerenciar dados</div>
+                  <button onClick={resetAll} style={{ width: "100%", padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--textFaint)", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
                     Resetar tudo
                   </button>
                 </div>
@@ -1042,7 +1100,7 @@ export default function App({ user, onSignOut }) {
                 Escolha a aparência do app. A preferência é salva na sua conta.
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14, marginBottom: 24 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: 14, marginBottom: 24 }}>
                 {Object.entries(THEMES).map(([key, t]) => {
                   const isActive = theme === key;
                   return (
@@ -1087,6 +1145,47 @@ export default function App({ user, onSignOut }) {
 
         </div>
       </main>
+
+      {/* ═══════════════════ BOTTOM NAV (MOBILE ONLY) ═══════════════════ */}
+      {isMobile && (
+        <nav style={{
+          position: "fixed", bottom: 0, left: 0, right: 0,
+          background: `color-mix(in srgb, var(--bg1) 85%, black)`,
+          backdropFilter: "blur(12px)", borderTop: "1px solid var(--border)",
+          display: "flex", justifyContent: "space-around", alignItems: "center",
+          padding: "10px 0 24px", zIndex: 100,
+        }}>
+          {[
+            { id: "tasks",     l: "Tarefas",    icon: (isActive) => (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            )},
+            { id: "add",       l: "Adicionar",  icon: (isActive) => (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            )},
+            { id: "stats",     l: "Stats",      icon: (isActive) => (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+            )},
+            { id: "customize", l: "Temas",      icon: (isActive) => (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            )},
+          ].map(item => {
+            const isActive = tab === item.id;
+            return (
+              <button key={item.id} onClick={() => setTab(item.id)} style={{
+                background: "transparent", border: "none",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                color: isActive ? "var(--accent)" : "var(--textFaint)",
+                cursor: "pointer", transition: "all 0.2s", padding: "8px 12px", borderRadius: 12,
+              }}>
+                <div style={{ transform: isActive ? "scale(1.1) translateY(-2px)" : "scale(1)", transition: "transform 0.2s" }}>
+                  {item.icon(isActive)}
+                </div>
+                <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500 }}>{item.l}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       <style>{`
         input[type="range"]::-webkit-slider-thumb {
