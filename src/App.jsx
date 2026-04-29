@@ -32,7 +32,11 @@ const uid    = () => Math.random().toString(36).slice(2, 9);
 const fmt    = (min) => { if (min < 60) return `${min}min`; const h = Math.floor(min / 60), m = min % 60; return m ? `${h}h${m}` : `${h}h`; };
 const fmtSec = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 const fmtS2M = (s) => fmt(Math.round(s / 60));
-const today  = () => new Date().toISOString().split("T")[0];
+const today  = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
 const fmtDate = () => new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
 const card = (extra = {}) => ({
@@ -124,7 +128,8 @@ export default function App({ user, onSignOut }) {
 
   // ─── Tarefa recorrente — idempotente ───
   const processRecurring = useCallback(async () => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = today();
+
     const { data: doneRecurring } = await supabase
       .from("tasks").select("title, category, priority, duration")
       .eq("recurring", true).eq("completed", true).lt("date", todayStr);
@@ -157,7 +162,8 @@ export default function App({ user, onSignOut }) {
         setTheme(THEMES[prefs.theme] ? prefs.theme : "default");
         if (prefs.sidebarPinned !== undefined) setSidebarPinned(prefs.sidebarPinned);
         setTasks(remoteTasks);
-        savePrefs({ lastActiveDate: new Date().toISOString().split("T")[0] }).catch(() => {});
+        savePrefs({ lastActiveDate: today() }).catch(() => {});
+
         await processRecurring();
       } catch (err) {
         if (!cancelled) flash(`Erro ao carregar dados: ${err.message}`);
@@ -490,8 +496,9 @@ export default function App({ user, onSignOut }) {
   const streak = (() => {
     const doneDates = [...new Set(tasks.filter(t => t.completed).map(t => t.date))];
     if (!doneDates.length) return 0;
-    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-    const yestStr = yesterday.toISOString().split("T")[0];
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const yestStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
     const lastDone = doneDates.sort().reverse()[0];
     if (lastDone < yestStr) return 0;
     let count = 1;
@@ -499,7 +506,8 @@ export default function App({ user, onSignOut }) {
     const cur = new Date(lastDone + "T12:00:00");
     for (let i = 0; i < 365; i++) {
       cur.setDate(cur.getDate() - 1);
-      const s = cur.toISOString().split("T")[0];
+      const s = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
+
       if (dSet.has(s)) count++; else break;
     }
     return count;
